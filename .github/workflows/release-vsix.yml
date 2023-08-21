@@ -1,0 +1,41 @@
+name: Release VSIX
+on:
+  push:
+    branches:
+      -
+  pull_request:
+    branches:
+      -
+permissions:
+  contents: write
+  
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "14"
+      - run: npm install
+      - run: npm run vscode:prepublish
+      - name: Install vsce
+        run: npm install -g vsce
+      - name: Package extension
+        run: vsce package
+      - uses: actions/upload-artifact@v2
+        with:
+          path: vscode-kport-0.0.1.vsix
+          name: vscode-kport.vsix
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: vscode-kport-0.0.1.vsix # Path to your VSIX artifact
+          tag_name: v1.0.0 # Replace with the desired tag name for the release
+          title: Release 1.0.0 # Replace with the desired release title
+          body: Release notes go here # Replace with the release notes
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
